@@ -36,15 +36,15 @@ import datetime
 
 # Define initial state (uncompressed)
 P1 = ct.one_atm; T1 = 300  
-q = 'H2:2 O2:1 N2:3.76'
+q = 'H2:2 O2:1'
 #mechanism = 'Mevel2015';
 #mechanism = 'Hong2011';
 #mechanism='Keromnes2013';
 #mechanism='Burke2012';
-mechanism='sandiego20161214_H2only';
+mechanism='cti/Lietal_2003';
 
-mech = mechanism+'.cti'
-file = True  # set true or false as needed
+mech = mechanism+'.yaml'
+file = False  # set true or false as needed
 file_name = 'compression_ignition_'+mechanism
 
 ##
@@ -94,7 +94,7 @@ for compression_ratio in np.linspace(start,stop,num=nsteps):
 
     # Compute constant-volume explosion
     # need to set final time sufficiently long for low temperature cases
-    CVout = cvsolve(gas,t_end=50.,max_step=1)
+    CVout = cvsolve(gas,t_end=50.,max_step=1,Method='Radau')
     t_ind.append(CVout['ind_time'])
     t_pulse.append(CVout['exo_time'])
     print('   Induction time = '+str(t_ind[-1])+' (s)')
@@ -135,3 +135,4 @@ plt.plot(T2,P)
 plt.xlabel('temperature (K)',fontsize=fontsize)
 plt.ylabel('pressure(MPa)',fontsize=fontsize)
 plt.title('Adiabatic compression CV ignition',fontsize=fontsize)
+plt.show()

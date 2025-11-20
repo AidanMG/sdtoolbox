@@ -31,9 +31,9 @@ import cantera as ct
 
 P1 = 100000 
 T1 = 300
-U1 = 3000
-q = 'H2:2 O2:1 N2:3.76'
-mech = 'Mevel2017.cti'
+U1 = 3500
+q = 'H2:2 O2:1'
+mech = 'cti/Lietal_2003.yaml'
 file_name = 'h2air'
 
 # Set up gas object
