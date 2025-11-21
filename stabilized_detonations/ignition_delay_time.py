@@ -10,6 +10,9 @@ from matplotlib import ticker
 from matplotlib.colors import LogNorm
 import os
 
+def md_loc(eta_0):
+    return 0.67*np.sqrt(eta_0)
+
 P1_range=np.logspace(4,7,20)  # Initial pressures to consider
 T1_range = np.linspace(1000,1400,20)  # Initial temperatures to consider
 T1_mesh, P1_mesh = np.meshgrid(T1_range, P1_range)
@@ -57,7 +60,7 @@ U1=540
 fig, ax = plt.subplots(figsize=(8,6))
 subs_series = np.log10(np.linspace(2,10,9,endpoint=True))
 norm= LogNorm()
-cs = ax.contourf(T1_mesh, P1_mesh, TI*U1, cmap='vidris', norm=norm, locator=ticker.LogLocator(subs='all'))
+cs = ax.contourf(T1_mesh, P1_mesh, TI*U1-1e-3*md_loc(P1_mesh/101325), cmap='viridis', norm=norm, locator=ticker.LogLocator(subs='all'))
 cb = fig.colorbar(cs, ticks = ticker.LogLocator(subs=range(10)))
 cb.ax.minorticks_on()
 ax.set_yscale('log')
