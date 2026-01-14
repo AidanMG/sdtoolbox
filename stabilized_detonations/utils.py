@@ -8,3 +8,4 @@ def md_loc(eta_0):
 # Models for mach disk diameter
 def md_dia(eta_e):
     return 5/2*np.log10(eta_e) - 3/4
+

@@ -23,12 +23,17 @@ fig, axes = plt.subplots(2, 2, figsize=(12, 10))
 
 gas = ct.Solution('cti/Lietal_2003.yaml')
 
-def Mach(u, T):
-    R = ct.gas_constant / gas.mean_molecular_weight
-    gamma = gas.cp / gas.cv
-    a = (0.1*gamma * R * T)**0.5
+gas.TPX = 300, 5*101.325, 'H2:2 O2:1'
+
+def Mach(u, gas_object):
+    R = gas_object.mean_molecular_weight**-1 * ct.gas_constant
+    gamma = gas_object.cp / gas_object.cv
+    T = gas_object.T
+    a = (gamma * R * T)**0.5
     return u / a
 
+print(Mach(u1[0], gas))
+quit()
 
 # Pressure
 axes[0,0].plot(x1, p1/p1[0], label=csv1)
@@ -57,9 +62,11 @@ axes[1,0].set_ylabel("Temperature")
 axes[1,0].grid(True)
 axes[1,0].legend()
 
+
+
 # Velocity
-axes[1,1].plot(x1, u1/u1[0], label=csv1)
-axes[1,1].plot(x2, u2/u2[0], label=csv2)
+axes[1,1].plot(x1, u1, label=csv1)
+axes[1,1].plot(x2, u2, label=csv2)
 axes[1,1].set_title("X-velocity vs Location")
 axes[1,1].set_xlabel("X")
 axes[1,1].set_ylabel("Velocity")

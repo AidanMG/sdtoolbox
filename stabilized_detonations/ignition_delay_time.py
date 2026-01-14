@@ -34,8 +34,6 @@ def cp_grid(T1_mesh, P1_mesh, q):
     # gas1.TPX = T1,P1,q
     # CPout = cpsolve(gas1,t_end=tend,max_step=1e-1)
 
-
-
     TI=np.zeros(T1_mesh.shape)
 
     for i in range(T1_mesh.shape[0]):
@@ -57,17 +55,34 @@ else:
     np.savez('ignition_delay_time.npz', T1_mesh=T1_mesh, P1_mesh=P1_mesh, TI=TI)
 # Using velocity Mach 1 roughly 540 m/s
 U1=540
-fig, ax = plt.subplots(figsize=(8,6))
+fig, axs = plt.subplots(2,1,figsize=(8,12))
+ax = axs[0]
+ax1 = axs[1]
 subs_series = np.log10(np.linspace(2,10,9,endpoint=True))
 norm= LogNorm()
-cs = ax.contourf(T1_mesh, P1_mesh, TI*U1-1e-3*md_loc(P1_mesh/101325), cmap='viridis', norm=norm, locator=ticker.LogLocator(subs='all'))
+cs = ax.contourf(T1_mesh, P1_mesh/101325, TI*U1, cmap='viridis', norm=norm, locator=ticker.LogLocator(subs='all'))
 cb = fig.colorbar(cs, ticks = ticker.LogLocator(subs=range(10)))
 cb.ax.minorticks_on()
 ax.set_yscale('log')
 cb.set_label('Ignition Delay length (m)')
 ax.set_xlabel('Initial Temperature (K)')
-ax.set_ylabel('Initial Pressure (Pa)')
+ax.set_ylabel('Pressure ratio')
 ax.set_title(f'Pre-shock Ignition Delay length for {q} using {mech} mechanism')
+
+# Models for mach disk diameter
+def md_dia(eta_e):
+    return 5/2*np.log10(eta_e) - 3/4
+
+
+# WRONG - This needs to be gotten by solving a 1D ZND for the initial conditions just behind the shock, with the pre-shock velocity (not U1)
+# cs1 = ax1.contourf(T1_mesh, P1_mesh/101325, 0.001*md_dia(P1_mesh/101325)/(TI*U1), cmap='viridis')
+# cb1 = fig.colorbar(cs1)
+# ax1.set_yscale('log')
+# cb1.set_label('xi parameter')
+# ax1.set_xlabel('Initial Temperature (K)')
+# ax1.set_ylabel('Pressure ratio')
+# ax1.set_title(f'')
+
 plt.show()
 
 
