@@ -192,6 +192,7 @@ def average_last_timesteps(
 def get_M(data):
     data["M"] = np.sqrt(data["Velocity_u"]**2 + data["Velocity_v"]**2)/data["Speed_of_Sound"]
     return data
+    
 
 if __name__ == "__main__":
     data5 = extract_paraview_csv("PR5.csv", columns=["Time", "Velocity_u", "Velocity_v", "Speed_of_Sound", "arc_length"])
