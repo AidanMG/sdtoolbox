@@ -18,7 +18,7 @@ def mixed_model(x, y):
     
     f2 = lambda x, A, B, C, D: A + B*x + C*x**2 + D*x**3
     res = curve_fit(f2, x, y, [0.5, 0.5, 0.5, 0.5])
-    print(res[0])
+    # print(res[0])
 
     fret = lambda x: f2(x, *res[0])
     return fret
@@ -37,15 +37,42 @@ def farfield_model(x, y):
     return fret
 
 
-def farfield_model_var(x, y):
-    G=1.4
-    x0 , A, C = 0.40, 3.65, 0.20 
+def farfield_model_var(x, y, gamma0=1.4):
+    G=gamma0
+    x0, A, C = 0.40, 3.65, 0.20 
     # f = lambda x, k1, k2, k3: (A*(x-x0)**(G-1))**k1 - (0.5*(G+1)/(G-1)/(A*(x-x0)**((G-1))))**k2 + (C*(x-x0)**(-3*(G-1)))**k3
     f = lambda x, k1, k2: k1*(A*(x-x0)**(G-1) - 0.5*(G+1)/(G-1)/(A*(x-x0)**(G-1))  +  C*(x-x0)**(-3*(G-1)))**k2
     res = curve_fit(f, x, y, [0.5, 0.5], maxfev=10000)
-    print("AS Coeffs:", res[0])
+    # print("AS Coeffs:", res[0])
     fret = lambda x: f(x, *res[0])
     return fret
+
+def get_full_model(gamma0=1.4):
+    data20 = extract_paraview_csv("PR20.csv", columns=["Time", "Velocity_u", "Velocity_v", "Speed_of_Sound", "arc_length", "Gamma", "Temperature"])
+    data20 = get_M(data20)
+    x, y, _ =average_last_timesteps(data20, "arc_length", "M")
+    x = x/0.1 #normalize by diameter
+    
+    M_low, M_mid, M_high = 1.5, 4, 7
+    
+    i_low = np.argmin(np.abs(y-M_low))
+    i_mid = np.argmin(np.abs(y-M_mid))
+    i_high = np.argmin(np.abs(y-M_high))
+    x_low = x[i_low]
+    x_mid = x[i_mid]
+    x_high = x[i_high]
+    
+    
+    f_near = nearfield_model(x[:i_low], y[:i_low])
+    f_mid = mixed_model(x[i_low:i_mid], y[i_low:i_mid])
+    f_far = farfield_model_var(x[i_mid:i_high], y[i_mid:i_high])
+    
+    conditions = lambda x: [x<=x_low, (x<=x_mid) & (x>x_low), x>x_mid]
+    functions = [f_near, f_mid, f_far]
+    
+    ftot = lambda x: np.piecewise(x, conditions(x), functions)
+    
+    return ftot
 
 
 
@@ -117,9 +144,7 @@ if __name__ == "__main__":
     print(x[i_high])
     M_max=7
     i_max = np.argmin(np.abs(y-M_max))
-    
-    
-    i_high
+
     # G = 1.40
     # f = lambda x, x0, A, C: A*(x-x0)**(G-1) - 0.5*(G+1)/(G-1)/(A*(x-x0)**(G-1))  +  C*(x-x0)**(-3*(G-1)) 
 
@@ -144,7 +169,7 @@ if __name__ == "__main__":
     plt.xlabel("x/D")
     plt.ylabel("M")
     plt.legend()
-    # plt.show()
+    plt.show()
     
     f_mixed = mixed_model(x[i_low:i_high],y[i_low:i_high])
     plt.plot(x[i_low:i_high],f_mixed(x[i_low:i_high]), 'g-', label="Ax+Bx^2+Cx^3+D")
