@@ -198,11 +198,24 @@ if __name__ == "__main__":
     data5 = extract_paraview_csv("PR5.csv", columns=["Time", "Velocity_u", "Velocity_v", "Speed_of_Sound", "arc_length"])
     data10 = extract_paraview_csv("PR10.csv", columns=["Time", "Velocity_u", "Velocity_v", "Speed_of_Sound", "arc_length"])
     data20 = extract_paraview_csv("PR20.csv", columns=["Time", "Velocity_u", "Velocity_v", "Speed_of_Sound", "arc_length"])
+    
+    data20Ax = extract_paraview_csv("PR20_Ax.csv", columns=["TimeStep", "Velocity_u", "Velocity_v", "Speed_of_Sound", "arc_length"])
+    
     data5 = get_M(data5)
     data10 = get_M(data10)
     data20 = get_M(data20)
 
+    data20Ax = get_M(data20Ax)
+    data20Ax_avg = average_last_timesteps(data20Ax, "arc_length", "M", time_col="TimeStep", n_last = 10)
+    data20_avg = average_last_timesteps(data20, "arc_length", "M", n_last=10)
+    #plt.plot(data20Ax_avg[0], data20Ax_avg[1])
+    plt.plot(data20_avg[0], data20_avg[1])
+    
+    
+    plt.show()
     fig, ax = plt.subplots(2,2)
+    
+    
 
     data5_avg = average_last_timesteps(data5, "arc_length", "M", n_last=10)
     ax[0][0].set_xlim(0,2)

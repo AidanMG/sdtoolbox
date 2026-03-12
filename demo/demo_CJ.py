@@ -37,12 +37,12 @@ from sdtoolbox.utilities import CJspeed_plot
 # q = Initial Composition 
 # mech = Cantera mechanism File name
 
-P1 = 100000 
+P1 = 20*ct.one_atm 
 P1atm = P1/ct.one_atm
 T1 = 300
 U = 2000
-q = 'H2:2 O2:1 N2:3.76'
-mech = 'Mevel2017.cti'
+q = 'H2:2 O2:1'
+mech = 'cti/Li2015.yaml'
 gas = ct.Solution(mech)
 
 # Outputs:

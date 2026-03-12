@@ -17,7 +17,7 @@ import os
 from scipy.optimize import fsolve
 
 
-def method2(gas, d, x_end, N=1000, method="cv", map=None):
+def method2(gas, d, x_end, N=1000, method="cv", map=None, accelerating=True):
     Nsp = gas.n_species
     
     if method=="cp":
@@ -35,8 +35,10 @@ def method2(gas, d, x_end, N=1000, method="cv", map=None):
         xs = map(xs)
     xs = xs * x_end
         
-    
-    M_func = get_full_model() # M(x/d)
+    if accelerating:
+        M_func = get_full_model() # M(x/d)
+    else:
+        M_func = lambda x: np.full_like(x, 1)
     
     Ms = M_func(xs/d)
     Ts = np.zeros_like(xs)
@@ -133,7 +135,7 @@ def isentropic(gas, M0, M1):
     
     return gas
     
-def plot_species_vs_time(solution, species=None, logy=False):
+def plot_species_vs_time(solution, species=None, logy=False, title=None, tlim=None):
     """
     Plot species mass fractions Yi vs time.
 
@@ -175,10 +177,13 @@ def plot_species_vs_time(solution, species=None, logy=False):
     ax.legend(loc="center left", bbox_to_anchor=(1.02, 0.5))
     
     # Make room for legend
-    fig.tight_layout()
+    # fig.tight_layout()
     fig.subplots_adjust(right=0.75)
+    if title:
+        ax.set_title(title)
+    if tlim:
+        ax.set_xlim(0,tlim)
 
-    plt.show()
     
 
 
@@ -188,76 +193,21 @@ def expansion_model(t, dia):
     
 
 if __name__ == "__main__":
-    pass
+    OneAtm = 101325
     gas = ct.Solution("cti/Lietal_2003.yaml")
-    gas.TPX = 1300, 2*1013250, "H2:2, O2:1"
-    dia = 0.025
-    xmax = dia*5
+    gas.TPX = 1200, 10*OneAtm, "H2:2, O2:1"
+    dia = 0.01
+    xmax = dia*1
     
     power_law_map = lambda xi, alpha: xi**alpha
     
     sol = method2(gas, dia, xmax, N=100, method='cv', map=lambda x: power_law_map(x, alpha=4))
+    gas.TPX = 1200, 10*OneAtm, "H2:2, O2:1"    
+    sol2 = method2(gas, dia, xmax*10, N=1000, method='cv', map=lambda x: power_law_map(x, alpha=4), accelerating=False)
     # plt.plot(sol['t'], sol['dTdt'])
-    plt.plot(sol['t'], sol['P'])
+    # plt.plot(sol['t'], sol['P'])
+    # plt.show()
+    plot_species_vs_time(sol, logy=False, title="Accelerating", tlim=False)
+    plot_species_vs_time(sol2, logy=False, title="Static", tlim=False)
     plt.show()
-    plot_species_vs_time(sol, logy=False)
     
-    
-    
-    
-    # #mach_profile = get_full_model()
-    # T0, P0 = 1000, 1013250
-    # q = "H2:2 O2:1"
-
-    # gas = ct.Solution("cti/Lietal_2003.yaml")
-
-    # # -------------------------
-    # # 1. Stagnation state
-    # # -------------------------
-    # gas.TPX = T0, P0, q
-
-    # h0 = gas.enthalpy_mass
-    # s0 = gas.entropy_mass
-
-    # # -------------------------
-    # # 2. Define residual
-    # # -------------------------
-
-    # def residual(T):
-
-    #     # For given T, solve for P from isentropy
-    #     def s_residual(P):
-    #         gas.TP = T, P
-    #         return gas.entropy_mass - s0
-
-    #     sol = root_scalar(s_residual, bracket=[1e2, P0*10])
-    #     P = sol.root
-
-    #     gas.TP = T, P
-
-    #     h = gas.enthalpy_mass
-    #     a = gas.sound_speed
-
-    #     return h + 0.5*a**2 - h0
-
-    # # -------------------------
-    # # 3. Solve for T
-    # # -------------------------
-    
-    # solT = root_scalar(residual, bracket=[T0*0.1, T0])
-    # T_static = solT.root
-
-    # # Compute final pressure
-    # def s_residual(P):
-    #     gas.TP = T_static, P
-    #     return gas.entropy_mass - s0
-
-    # solP = root_scalar(s_residual, bracket=[1e2, P0*10])
-    # P_static = solP.root
-
-    # print(T_static, P_static)
-    
-    
-    
-    
-

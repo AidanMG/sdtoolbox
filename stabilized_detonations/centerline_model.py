@@ -3,6 +3,8 @@ from plotting_utilities import extract_paraview_csv, get_M, average_last_timeste
 from matplotlib import pyplot as plt
 import numpy as np
 
+
+
 def nearfield_model(x, y):
     # f = lambda x, A, B: 1 + A*x**B
     f = lambda x, A, B, C: 1 + A*x + B*x**2 + C*x**3
@@ -83,6 +85,13 @@ if __name__ == "__main__":
     data20 = get_M(data20)
     bigD20 = extract_paraview_csv("bigD_PR20.csv", columns=["Time", "Velocity_u", "Velocity_v", "Speed_of_Sound", "arc_length", "Gamma", "Temperature"])
     bigD20 = get_M(bigD20)    
+    
+    dataAx20 = extract_paraview_csv("PR20_Ax.csv", columns=["Time", "Velocity_u", "Velocity_v", "Speed_of_Sound", "arc_length", "Gamma", "Temperature"])
+    
+    dataAx20 = get_M(dataAx20)
+    
+    
+    
     
     smDia = 0.01
     Dia = 0.1
